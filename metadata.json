@@ -1,0 +1,6 @@
+{
+  "name": "AdPilot AI",
+  "description": "AI-powered Facebook & Instagram Advertising Strategy Platform for high-performance B2B & eCommerce marketers.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
