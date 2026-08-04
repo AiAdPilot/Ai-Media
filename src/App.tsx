@@ -25,7 +25,7 @@ import { NavigationTab, CampaignRequest, CampaignStrategy } from './types';
 import { 
   saveCampaignRequestToSupabase, 
   fetchCampaignRequests, 
-  getSupabaseClient 
+  DatabaseOperationResult 
 } from './lib/supabase';
 import { generateStrategyFromRequest } from './lib/strategyGenerator';
 
@@ -57,23 +57,24 @@ export default function App() {
     loadRequests();
   }, []);
 
-  // Form Submission Handler
-  const handleFormSubmit = async (formData: CampaignRequest) => {
-    setCurrentRequest(formData);
-    
-    // 1. Generate Strategy object
-    const strategy = generateStrategyFromRequest(formData);
+  // Form Submission Handler called when CampaignForm submits
+  const handleFormSubmit = async (
+    formData: CampaignRequest, 
+    saveResult?: DatabaseOperationResult<CampaignRequest>
+  ) => {
+    // 1. Determine final saved data (with returned ID)
+    const result = saveResult || await saveCampaignRequestToSupabase(formData);
+    const savedData = result.data || formData;
+
+    setCurrentRequest(savedData);
+    setIsSavedInSupabaseThisSession(result.isSupabase);
+
+    // 2. Generate Strategy object based on saved request
+    const strategy = generateStrategyFromRequest(savedData);
     setCurrentStrategy(strategy);
 
-    // 2. Save campaign request to Supabase campaign_requests table
-    const saveResult = await saveCampaignRequestToSupabase(formData);
-    setIsSavedInSupabaseThisSession(saveResult.isSupabase);
-
-    // Refresh list of campaign requests
-    loadRequests();
-
-    // 3. Switch to loading experience
-    setAppState('loading');
+    // Refresh saved campaign requests list from DB
+    await loadRequests();
   };
 
   // Loading finished handler
@@ -126,7 +127,6 @@ export default function App() {
         activeTab={activeTab}
         onTabChange={(tab) => {
           setActiveTab(tab);
-          // If switching back to AI Strategist, keep state intact or reset if desired
         }}
         isOpenMobile={isMobileSidebarOpen}
         onCloseMobile={() => setIsMobileSidebarOpen(false)}
