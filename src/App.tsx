@@ -95,36 +95,44 @@ export default function App() {
     );
   };
 
+  const isPublicPage = activeTab === 'home' || activeTab === 'login' || activeTab === 'register';
+
   return (
     <div className="min-h-screen bg-white text-slate-900 flex font-body antialiased selection:bg-slate-900 selection:text-white">
-      {/* Minimal Left Sidebar */}
-      <Sidebar
-        activeTab={activeTab}
-        onTabChange={(tab) => setActiveTab(tab)}
-        isOpenMobile={isMobileSidebarOpen}
-        onCloseMobile={() => setIsMobileSidebarOpen(false)}
-        projectName={selectedProject?.product_name}
-      />
+      {/* Show Sidebar ONLY in Protected Area (not on public homepage/auth) */}
+      {!isPublicPage && (
+        <Sidebar
+          activeTab={activeTab}
+          onTabChange={(tab) => setActiveTab(tab)}
+          isOpenMobile={isMobileSidebarOpen}
+          onCloseMobile={() => setIsMobileSidebarOpen(false)}
+          projectName={selectedProject?.product_name}
+        />
+      )}
 
       {/* Main Content Viewport */}
       <div className="flex-1 flex flex-col min-w-0 bg-white">
-        {/* Top Header Nav */}
-        <TopNav
-          activeTab={activeTab}
-          onOpenMobileSidebar={() => setIsMobileSidebarOpen(true)}
-          onOpenDrawer={() => setIsRightDrawerOpen(true)}
-          onNavigate={(tab) => setActiveTab(tab)}
-          selectedProjectName={selectedProject?.product_name}
-        />
+        {/* Show Workspace TopNav ONLY in Protected Area */}
+        {!isPublicPage && (
+          <TopNav
+            activeTab={activeTab}
+            onOpenMobileSidebar={() => setIsMobileSidebarOpen(true)}
+            onOpenDrawer={() => setIsRightDrawerOpen(true)}
+            onNavigate={(tab) => setActiveTab(tab)}
+            selectedProjectName={selectedProject?.product_name}
+          />
+        )}
 
         {/* Dynamic Page Views */}
-        <main className="flex-1 overflow-y-auto bg-slate-50/40">
+        <main className={`flex-1 overflow-y-auto ${isPublicPage ? 'bg-white' : 'bg-slate-50/40'}`}>
           {activeTab === 'home' && (
             <HomePage
               onNewProject={handleCreateNewProject}
               onSelectProject={handleSelectProject}
               onNavigateToAI={() => setActiveTab('ai_assistant')}
               onNavigateToProjects={() => setActiveTab('projects')}
+              onNavigateToRegister={() => setActiveTab('register')}
+              onNavigateToLogin={() => setActiveTab('login')}
               recentRequests={allProjects}
             />
           )}
@@ -153,25 +161,27 @@ export default function App() {
 
           {activeTab === 'login' && (
             <LoginPage
-              onLoginSuccess={() => setActiveTab('home')}
+              onLoginSuccess={() => setActiveTab('projects')}
               onNavigateToRegister={() => setActiveTab('register')}
             />
           )}
 
           {activeTab === 'register' && (
             <RegisterPage
-              onRegisterSuccess={() => setActiveTab('home')}
+              onRegisterSuccess={() => setActiveTab('projects')}
               onNavigateToLogin={() => setActiveTab('login')}
             />
           )}
         </main>
       </div>
 
-      {/* Right AI Assistant Copilot Drawer */}
-      <RightDrawer
-        isOpen={isRightDrawerOpen}
-        onClose={() => setIsRightDrawerOpen(false)}
-      />
+      {/* Right AI Assistant Copilot Drawer (active in protected area) */}
+      {!isPublicPage && (
+        <RightDrawer
+          isOpen={isRightDrawerOpen}
+          onClose={() => setIsRightDrawerOpen(false)}
+        />
+      )}
     </div>
   );
 }
