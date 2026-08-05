@@ -60,6 +60,32 @@ Product Brief:
 
 Return a structured executive briefing in pure JSON matching this exact structure:
 {
+  "health_assessment": {
+    "product_quality": { "key": "product_quality", "label": "Product Quality", "score": 88, "verdict": "Detailed diagnostic note on product quality" },
+    "offer_strength": { "key": "offer_strength", "label": "Offer Strength", "score": 82, "verdict": "Diagnostic note on offer structure" },
+    "market_demand": { "key": "market_demand", "label": "Market Demand", "score": 90, "verdict": "Diagnostic note on search and market volume" },
+    "competitive_position": { "key": "competitive_position", "label": "Competitive Position", "score": 80, "verdict": "Diagnostic note on competitor gap" },
+    "landing_page_quality": { "key": "landing_page_quality", "label": "Landing Page Quality", "score": 75, "verdict": "Diagnostic note on UX and above-fold conversion friction" },
+    "pricing": { "key": "pricing", "label": "Pricing", "score": 85, "verdict": "Diagnostic note on price point and margins" },
+    "audience_clarity": { "key": "audience_clarity", "label": "Audience Clarity", "score": 92, "verdict": "Diagnostic note on audience targeting precision" },
+    "messaging_quality": { "key": "messaging_quality", "label": "Messaging Quality", "score": 84, "verdict": "Diagnostic note on copy and hook resonance" },
+    "creative_potential": { "key": "creative_potential", "label": "Creative Potential", "score": 88, "verdict": "Diagnostic note on video UGC and visual assets" },
+    "budget_sufficiency": { "key": "budget_sufficiency", "label": "Budget Sufficiency", "score": 78, "verdict": "Diagnostic note on budget signal velocity" },
+    "overall_readiness_score": 84,
+    "readiness_status": "MODERATE_POTENTIAL",
+    "readiness_verdict": "Detailed AI explanation of campaign readiness. If score < 70, explain explicitly why the campaign is NOT ready to launch yet. If score > 85, explain why it has high scaling potential. If 70-85, explain key tweaks before scaling."
+  },
+  "priority_fixes": [
+    {
+      "id": "fix_1",
+      "title": "Actionable Fix Title",
+      "category": "Category Name",
+      "impact": "CRITICAL",
+      "difficulty": "Easy",
+      "estimated_roas_improvement": "+0.8x to +1.5x ROAS",
+      "reasoning": "Detailed strategic reasoning explaining why fixing this yields immediate conversion and ROAS lift."
+    }
+  ],
   "executive_summary": "High-level Bain/McKinsey style strategic synthesis of the campaign opportunity and growth thesis.",
   "scores": {
     "offer_score": 88,

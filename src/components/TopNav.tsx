@@ -1,5 +1,5 @@
 import React from 'react';
-import { Search, Bell, Sparkles, Menu, Database, CheckCircle2, ShieldAlert } from 'lucide-react';
+import { Search, Bell, Sparkles, Menu, Database, CheckCircle2, ShieldAlert, Command } from 'lucide-react';
 import { NavigationTab } from '../types';
 
 interface TopNavProps {
@@ -7,7 +7,8 @@ interface TopNavProps {
   onOpenMobileSidebar: () => void;
   onOpenDrawer: () => void;
   onNavigate: (tab: NavigationTab) => void;
-  isSupabaseConnected: boolean;
+  isSupabaseConnected?: boolean;
+  selectedProjectName?: string;
 }
 
 export const TopNav: React.FC<TopNavProps> = ({
@@ -15,111 +16,105 @@ export const TopNav: React.FC<TopNavProps> = ({
   onOpenMobileSidebar,
   onOpenDrawer,
   onNavigate,
-  isSupabaseConnected,
+  isSupabaseConnected = false,
+  selectedProjectName,
 }) => {
   const getTabTitle = () => {
     switch (activeTab) {
-      case 'ai_strategist':
-        return 'AI Campaign Strategist';
-      case 'dashboard':
-        return 'Performance Overview';
-      case 'campaigns':
-        return 'Campaign Requests & Management';
-      case 'products':
-        return 'Product Catalog';
-      case 'creatives':
-        return 'Ad Creatives & Copy Engine';
-      case 'audience':
-        return 'Audience Intelligence';
-      case 'analytics':
-        return 'Meta Ads Analytics';
-      case 'knowledge_base':
-        return 'Meta Ad Policy & Playbooks';
+      case 'home':
+        return 'Overview';
+      case 'projects':
+        return 'Campaign Projects';
+      case 'project_workspace':
+        return selectedProjectName ? `Project Workspace / ${selectedProjectName}` : 'Project Workspace';
+      case 'brand_assets':
+        return 'Brand Assets & Guidelines';
+      case 'ai_assistant':
+        return 'AI Copilot & Strategist';
       case 'settings':
-        return 'Platform & Database Settings';
+        return 'Workspace Settings';
+      case 'login':
+        return 'Account Sign In';
+      case 'register':
+        return 'Create Account';
       default:
         return 'AdPilot AI';
     }
   };
 
   return (
-    <header className="h-16 bg-white border-b border-[#E2E8F0] px-4 lg:px-8 flex items-center justify-between sticky top-0 z-30">
-      {/* Left section: Mobile menu toggle & title */}
+    <header className="h-16 bg-white border-b border-slate-200/80 px-4 lg:px-8 flex items-center justify-between sticky top-0 z-30 select-none">
+      {/* Left Section: Mobile Menu & Breadcrumb Title */}
       <div className="flex items-center gap-3">
         <button
           onClick={onOpenMobileSidebar}
-          className="p-2 text-[#64748B] hover:text-[#0F172A] hover:bg-[#F8FAFC] rounded-lg lg:hidden"
+          className="p-2 text-slate-500 hover:text-slate-900 hover:bg-slate-100 rounded-xl lg:hidden"
           aria-label="Open menu"
         >
           <Menu className="w-5 h-5" />
         </button>
 
-        <div className="flex items-center gap-3">
-          <h1 className="font-heading text-lg font-bold text-[#0F172A]">
+        <div className="flex items-center gap-2">
+          <span className="text-xs font-mono font-medium text-slate-400 hidden sm:inline">AdPilot /</span>
+          <h1 className="font-heading text-sm font-extrabold text-slate-900 tracking-tight">
             {getTabTitle()}
           </h1>
 
-          {/* Database status pill */}
+          {/* Database pill */}
           <button
             onClick={() => onNavigate('settings')}
             className={`
-              hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border transition-colors
+              hidden sm:flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-mono border transition-colors ml-2
               ${isSupabaseConnected 
-                ? 'bg-emerald-50 text-[#16A34A] border-emerald-200 hover:bg-emerald-100' 
-                : 'bg-amber-50 text-[#F59E0B] border-amber-200 hover:bg-amber-100'
+                ? 'bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100' 
+                : 'bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-100'
               }
             `}
-            title={isSupabaseConnected ? 'Connected to Supabase campaign_requests table' : 'Running in local storage mode (Click to configure Supabase)'}
+            title={isSupabaseConnected ? 'Connected to Supabase DB' : 'Running in local state mode'}
           >
             <Database className="w-3 h-3 shrink-0" />
-            <span>{isSupabaseConnected ? 'Supabase Active' : 'Local Persistence'}</span>
-            {isSupabaseConnected ? (
-              <CheckCircle2 className="w-3 h-3 text-[#16A34A]" />
-            ) : (
-              <ShieldAlert className="w-3 h-3 text-[#F59E0B]" />
-            )}
+            <span>{isSupabaseConnected ? 'Database Connected' : 'Local State'}</span>
           </button>
         </div>
       </div>
 
-      {/* Right section: Search bar & Quick Actions */}
+      {/* Right Section: Search & Quick Copilot Button */}
       <div className="flex items-center gap-3">
-        {/* Search */}
-        <div className="relative hidden md:block w-64">
-          <Search className="w-4 h-4 text-[#64748B] absolute left-3 top-1/2 -translate-y-1/2" />
+        {/* Search Input Mock */}
+        <div className="relative hidden md:flex items-center w-56">
+          <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3" />
           <input
             type="text"
-            placeholder="Search campaigns, ads..."
-            className="w-full bg-[#F8FAFC] border border-[#E2E8F0] rounded-lg pl-9 pr-3 py-1.5 text-xs text-[#0F172A] placeholder-[#64748B] focus:outline-none focus:border-[#2563EB] focus:ring-1 focus:ring-[#2563EB] transition-all"
+            placeholder="Search workspace..."
+            className="w-full bg-slate-50 border border-slate-200/80 rounded-xl pl-8 pr-8 py-1.5 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-slate-400 transition-all font-body"
           />
+          <div className="absolute right-2.5 px-1.5 py-0.5 rounded border border-slate-200 bg-white text-[10px] font-mono text-slate-400 flex items-center gap-0.5">
+            <Command className="w-2.5 h-2.5" /> K
+          </div>
         </div>
 
-        {/* AI Assistant Quick Drawer Toggle */}
+        {/* AI Copilot Drawer Toggle */}
         <button
           onClick={onOpenDrawer}
-          className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 text-[#2563EB] hover:bg-blue-100 border border-blue-200 rounded-lg text-xs font-semibold transition-colors"
+          className="flex items-center gap-2 px-3 py-1.5 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-semibold shadow-2xs transition-all"
         >
-          <Sparkles className="w-3.5 h-3.5" />
-          <span className="hidden sm:inline">AI Copilot</span>
+          <Sparkles className="w-3.5 h-3.5 text-indigo-400" />
+          <span className="hidden sm:inline">AI Assistant</span>
         </button>
 
         {/* Notifications */}
         <button 
-          className="p-2 text-[#64748B] hover:text-[#0F172A] hover:bg-[#F8FAFC] rounded-lg relative"
+          className="p-2 text-slate-500 hover:text-slate-900 hover:bg-slate-100 rounded-xl relative transition-colors"
           aria-label="Notifications"
         >
           <Bell className="w-4 h-4" />
-          <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-[#2563EB] rounded-full ring-2 ring-white"></span>
+          <span className="absolute top-2 right-2 w-2 h-2 bg-indigo-600 rounded-full"></span>
         </button>
 
-        {/* User Profile */}
-        <div className="pl-2 border-l border-[#E2E8F0] flex items-center gap-2">
-          <div className="w-8 h-8 rounded-full bg-slate-900 text-white flex items-center justify-center font-heading font-bold text-xs shadow-xs">
-            AP
-          </div>
-          <div className="hidden xl:block text-left">
-            <p className="text-xs font-semibold text-[#0F172A] leading-tight">Alex Rivera</p>
-            <p className="text-[10px] text-[#64748B]">Growth Director</p>
+        {/* Quick User Avatar */}
+        <div className="pl-1 flex items-center gap-2">
+          <div className="w-8 h-8 rounded-full bg-slate-900 text-white flex items-center justify-center font-heading font-bold text-xs shadow-2xs">
+            KE
           </div>
         </div>
       </div>

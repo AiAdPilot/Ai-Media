@@ -1,15 +1,23 @@
 export type CampaignGoal = 'Sales' | 'Leads' | 'Traffic' | 'Engagement';
 
 export type NavigationTab = 
-  | 'ai_strategist'
-  | 'dashboard'
-  | 'campaigns'
-  | 'products'
-  | 'creatives'
-  | 'audience'
-  | 'analytics'
-  | 'knowledge_base'
-  | 'settings';
+  | 'home'
+  | 'projects'
+  | 'project_workspace'
+  | 'brand_assets'
+  | 'ai_assistant'
+  | 'settings'
+  | 'login'
+  | 'register';
+
+export type ProjectWorkspaceTab =
+  | 'overview'
+  | 'campaign_brief'
+  | 'strategy'
+  | 'ad_copy'
+  | 'creative_studio'
+  | 'publishing'
+  | 'performance';
 
 export interface CampaignRequest {
   id?: string;
@@ -140,12 +148,50 @@ export interface ActionPlanStep {
   tasks: string[];
 }
 
+export interface HealthCategoryScore {
+  key: string;
+  label: string;
+  score: number; // 0-100
+  verdict: string;
+}
+
+export interface HealthAssessment {
+  product_quality: HealthCategoryScore;
+  offer_strength: HealthCategoryScore;
+  market_demand: HealthCategoryScore;
+  competitive_position: HealthCategoryScore;
+  landing_page_quality: HealthCategoryScore;
+  pricing: HealthCategoryScore;
+  audience_clarity: HealthCategoryScore;
+  messaging_quality: HealthCategoryScore;
+  creative_potential: HealthCategoryScore;
+  budget_sufficiency: HealthCategoryScore;
+
+  overall_readiness_score: number; // 0-100
+  readiness_status: 'NOT_READY' | 'MODERATE_POTENTIAL' | 'HIGH_POTENTIAL';
+  readiness_verdict: string; // AI explanation depending on <70, 70-85, or >85
+}
+
+export interface PriorityFixItem {
+  id?: string;
+  title: string;
+  category: string;
+  impact: 'CRITICAL' | 'HIGH' | 'MEDIUM';
+  difficulty: 'Easy' | 'Medium' | 'Hard';
+  estimated_roas_improvement: string; // e.g., "+0.8x to +1.5x ROAS"
+  reasoning: string;
+}
+
 export interface CampaignStrategy {
   id: string;
   request_id?: string;
   campaign_request_id?: string;
   product_name: string;
   created_at: string;
+
+  // Campaign Health Assessment & Priority Fixes
+  health_assessment?: HealthAssessment;
+  priority_fixes?: PriorityFixItem[];
 
   // Executive Intelligence Engine Report
   executive_summary: string;

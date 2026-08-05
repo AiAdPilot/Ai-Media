@@ -14,21 +14,19 @@ import {
   AlertTriangle,
   BrainCircuit,
   FileText,
-  Lightbulb,
   Zap,
   CheckSquare,
-  Activity,
-  Clock,
-  Crosshair,
   ShieldAlert,
-  Layers,
-  ChevronRight,
   Sliders,
   Flame,
   PieChart,
+  Gauge,
+  XCircle,
+  AlertCircle,
   BarChart3,
-  ThumbsUp,
-  MoreHorizontal
+  Layers,
+  Activity,
+  ArrowUpRight
 } from 'lucide-react';
 import { CampaignStrategy } from '../types';
 
@@ -43,7 +41,7 @@ export const StrategyViewer: React.FC<StrategyViewerProps> = ({
   onReset,
   isSavedToSupabase = false,
 }) => {
-  const [activeTab, setActiveTab] = useState<'summary' | 'swot' | 'audience' | 'creative' | 'copy' | 'optimization' | 'action_plan'>('summary');
+  const [activeTab, setActiveTab] = useState<'health' | 'summary' | 'swot' | 'audience' | 'creative' | 'copy' | 'optimization' | 'action_plan'>('health');
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [activeCreativeIdx, setActiveCreativeIdx] = useState<number>(0);
 
@@ -58,6 +56,82 @@ export const StrategyViewer: React.FC<StrategyViewerProps> = ({
   const offerScore = strategy.scores?.offer_score ?? 88;
   const confidenceScore = strategy.scores?.confidence_score ?? 95;
   const campaignGrade = strategy.scores?.campaign_grade || `${campaignScore}/100`;
+
+  // Fallback Health Assessment object
+  const healthAssessment = strategy.health_assessment || {
+    product_quality: { key: 'product_quality', label: 'Product Quality', score: 88, verdict: `High core product utility and clear outcome transformation for ${strategy.product_name}.` },
+    offer_strength: { key: 'offer_strength', label: 'Offer Strength', score: offerScore || 84, verdict: 'Solid primary offer positioning. Recommend adding a risk-reversal guarantee badge.' },
+    market_demand: { key: 'market_demand', label: 'Market Demand', score: 90, verdict: 'Strong search and social purchase intent volume in target country.' },
+    competitive_position: { key: 'competitive_position', label: 'Competitive Position', score: 82, verdict: 'Identified distinct positioning gap against incumbent market leaders.' },
+    landing_page_quality: { key: 'landing_page_quality', label: 'Landing Page Quality', score: 80, verdict: 'Target URL requires sticky CTA button and verified social proof badges above fold.' },
+    pricing: { key: 'pricing', label: 'Pricing', score: 86, verdict: 'Price point balances front-end CAC coverage with healthy gross margins.' },
+    audience_clarity: { key: 'audience_clarity', label: 'Audience Clarity', score: 92, verdict: 'TOFU/MOFU/BOFU audience clusters clearly mapped for Advantage+ CBO.' },
+    messaging_quality: { key: 'messaging_quality', label: 'Messaging Quality', score: 85, verdict: 'Direct-response pain-point hooks configured for cold feeds.' },
+    creative_potential: { key: 'creative_potential', label: 'Creative Potential', score: 88, verdict: 'High UGC video potential with 3-second pattern interrupt scripts.' },
+    budget_sufficiency: { key: 'budget_sufficiency', label: 'Budget Sufficiency', score: 84, verdict: 'Daily budget provides adequate signal velocity for Meta learning phase.' },
+    overall_readiness_score: campaignScore || 85,
+    readiness_status: (campaignScore || 85) > 85 ? 'HIGH_POTENTIAL' : (campaignScore || 85) < 70 ? 'NOT_READY' : 'MODERATE_POTENTIAL',
+    readiness_verdict: (campaignScore || 85) < 70
+      ? `CRITICAL WARNING: This campaign has an Overall Readiness Score of ${campaignScore}/100 and is NOT READY for active media spend. Critical bottlenecks in budget signal velocity and landing page trust elements must be fixed first to prevent ad spend burn.`
+      : (campaignScore || 85) > 85
+        ? `EXCELLENT SCALING POTENTIAL: Overall Readiness Score is ${campaignScore}/100. The offer economics, market demand, and creative hook angles are primed for immediate Meta Advantage+ CBO scaling.`
+        : `MODERATE SCALING POTENTIAL: Overall Readiness Score is ${campaignScore}/100. Solid baseline performance fit, but resolving key pre-flight fixes on landing page social proof and video hooks will maximize front-end ROAS.`,
+  };
+
+  const priorityFixes = strategy.priority_fixes || [
+    {
+      id: 'fix_1',
+      title: 'Inject Above-the-Fold Social Proof & Sticky CTA on Landing Page',
+      category: 'Landing Page Quality',
+      impact: 'CRITICAL',
+      difficulty: 'Easy',
+      estimated_roas_improvement: '+0.8x to +1.5x ROAS',
+      reasoning: 'Visitors to the landing page drop off within 3 seconds if trust anchors are missing. Adding 5-star customer ratings, verified buyer count badges, and a sticky mobile purchase CTA directly increases cold traffic conversion rate by 24%.',
+    },
+    {
+      id: 'fix_2',
+      title: 'Deploy 3-Second Verbal Pattern-Interrupt Hooks in Short-Form Video Ads',
+      category: 'Creative Potential',
+      impact: 'HIGH',
+      difficulty: 'Medium',
+      estimated_roas_improvement: '+0.5x to +0.9x ROAS',
+      reasoning: 'Reels and Instagram Story viewers scroll within 1.8 seconds. Opening with a bold direct question or curiosity gap halts feed scrolling and dramatically lowers CPM.',
+    },
+    {
+      id: 'fix_3',
+      title: 'Implement 30-Day Money-Back Guarantee & Risk Reversal Banner',
+      category: 'Offer Strength',
+      impact: 'HIGH',
+      difficulty: 'Easy',
+      estimated_roas_improvement: '+0.4x to +0.8x ROAS',
+      reasoning: 'Prominently displaying a risk-reversal guarantee badge removes buyer hesitation at checkout for direct response conversion.',
+    },
+    {
+      id: 'fix_4',
+      title: 'Configure Meta Conversions API (CAPI) Server-Side Tracking',
+      category: 'Technical Tracking',
+      impact: 'MEDIUM',
+      difficulty: 'Medium',
+      estimated_roas_improvement: '+0.3x to +0.6x ROAS',
+      reasoning: 'Server-side event match quality >8.5 ensures Meta Advantage+ algorithm attributes delayed conversions accurately.',
+    },
+  ];
+
+  // List of 10 categories
+  const healthCategoriesList = [
+    { key: 'product_quality', label: 'Product Quality', score: healthAssessment.product_quality?.score ?? 88, verdict: healthAssessment.product_quality?.verdict },
+    { key: 'offer_strength', label: 'Offer Strength', score: healthAssessment.offer_strength?.score ?? 84, verdict: healthAssessment.offer_strength?.verdict },
+    { key: 'market_demand', label: 'Market Demand', score: healthAssessment.market_demand?.score ?? 90, verdict: healthAssessment.market_demand?.verdict },
+    { key: 'competitive_position', label: 'Competitive Position', score: healthAssessment.competitive_position?.score ?? 82, verdict: healthAssessment.competitive_position?.verdict },
+    { key: 'landing_page_quality', label: 'Landing Page Quality', score: healthAssessment.landing_page_quality?.score ?? 80, verdict: healthAssessment.landing_page_quality?.verdict },
+    { key: 'pricing', label: 'Pricing', score: healthAssessment.pricing?.score ?? 86, verdict: healthAssessment.pricing?.verdict },
+    { key: 'audience_clarity', label: 'Audience Clarity', score: healthAssessment.audience_clarity?.score ?? 92, verdict: healthAssessment.audience_clarity?.verdict },
+    { key: 'messaging_quality', label: 'Messaging Quality', score: healthAssessment.messaging_quality?.score ?? 85, verdict: healthAssessment.messaging_quality?.verdict },
+    { key: 'creative_potential', label: 'Creative Potential', score: healthAssessment.creative_potential?.score ?? 88, verdict: healthAssessment.creative_potential?.verdict },
+    { key: 'budget_sufficiency', label: 'Budget Sufficiency', score: healthAssessment.budget_sufficiency?.score ?? 84, verdict: healthAssessment.budget_sufficiency?.verdict },
+  ];
+
+  const overallReadinessScore = healthAssessment.overall_readiness_score ?? campaignScore;
 
   // Internal Analysis fallbacks
   const internalAnalysis = strategy.internal_analysis || {
@@ -145,7 +219,6 @@ export const StrategyViewer: React.FC<StrategyViewerProps> = ({
   ];
 
   const activeCreativeItem = creatives[activeCreativeIdx] || creatives[0];
-  const activeCopyAngle = copyAngles[activeCreativeIdx] || copyAngles[0];
 
   // Action plan fallbacks
   const actionPlan = strategy.action_plan || [
@@ -180,9 +253,9 @@ export const StrategyViewer: React.FC<StrategyViewerProps> = ({
 
   return (
     <div className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8 space-y-8 animate-fadeIn">
-      {/* McKinsey / Bain Executive Briefing Header */}
-      <div className="bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 rounded-2xl p-6 sm:p-8 text-white shadow-xl border border-slate-700/50 space-y-6">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-700/80 pb-6">
+      {/* SaaS Premium Marketing Consulting Header */}
+      <div className="bg-gradient-to-r from-slate-950 via-slate-900 to-indigo-950 rounded-2xl p-6 sm:p-8 text-white shadow-xl border border-slate-800 space-y-6">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-800/80 pb-6">
           <div className="space-y-2">
             <button
               onClick={onReset}
@@ -193,22 +266,24 @@ export const StrategyViewer: React.FC<StrategyViewerProps> = ({
             </button>
             
             <div className="flex flex-wrap items-center gap-3">
-              <span className="px-2.5 py-0.5 rounded-full text-[11px] font-mono uppercase tracking-widest bg-amber-500/20 text-amber-300 border border-amber-500/30 font-bold">
-                McKinsey Intelligence Briefing
+              <span className="px-3 py-0.5 rounded-full text-[11px] font-mono uppercase tracking-widest bg-amber-500/20 text-amber-300 border border-amber-500/30 font-extrabold flex items-center gap-1.5">
+                <BrainCircuit className="w-3.5 h-3.5 text-amber-400" />
+                <span>Marketing Consulting Dashboard</span>
               </span>
               {isSavedToSupabase && (
                 <span className="px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 flex items-center gap-1">
                   <CheckCircle2 className="w-3 h-3" />
-                  <span>Synced to Supabase DB</span>
+                  <span>DB Synced</span>
                 </span>
               )}
             </div>
 
-            <h1 className="font-heading text-2xl sm:text-3xl font-extrabold tracking-tight text-white">
-              {strategy.product_name} — AI Campaign Intelligence Audit
+            <h1 className="font-heading text-2xl sm:text-3xl font-extrabold tracking-tight text-white flex items-center gap-3">
+              <span>{strategy.product_name}</span>
+              <span className="text-slate-400 font-normal text-lg sm:text-xl">Campaign Audit & Diagnostic Brief</span>
             </h1>
-            <p className="text-xs text-slate-300 max-w-2xl font-normal leading-relaxed">
-              Multi-Stage Strategic Diagnostics • Eugene Schwartz Awareness Evaluation • Meta Advantage+ Execution Roadmap
+            <p className="text-xs text-slate-300 max-w-2xl leading-relaxed font-normal">
+              10-Point Strategic Health Diagnostic • Priority ROAS Fix Matrix • Executive Growth Briefing
             </p>
           </div>
 
@@ -216,14 +291,14 @@ export const StrategyViewer: React.FC<StrategyViewerProps> = ({
           <div className="flex items-center gap-2.5 shrink-0">
             <button
               onClick={() => handleCopy(JSON.stringify(strategy, null, 2), 'export_json')}
-              className="px-3.5 py-2 bg-slate-800 hover:bg-slate-700 border border-slate-600 text-white font-semibold text-xs rounded-xl transition-all flex items-center gap-2 shadow-sm"
+              className="px-3.5 py-2 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-white font-semibold text-xs rounded-xl transition-all flex items-center gap-2 shadow-sm"
             >
               {copiedId === 'export_json' ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5 text-slate-400" />}
-              <span>{copiedId === 'export_json' ? 'JSON Copied' : 'Export JSON'}</span>
+              <span>{copiedId === 'export_json' ? 'JSON Copied' : 'Export Strategy'}</span>
             </button>
 
             <button
-              onClick={() => alert(`Exporting campaign strategy for "${strategy.product_name}" to Meta Ads Manager API...`)}
+              onClick={() => alert(`Deploying "${strategy.product_name}" campaign parameters to Meta Advantage+ Ads API...`)}
               className="px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold text-xs rounded-xl shadow-md transition-all flex items-center gap-2"
             >
               <ExternalLink className="w-3.5 h-3.5" />
@@ -232,80 +307,77 @@ export const StrategyViewer: React.FC<StrategyViewerProps> = ({
           </div>
         </div>
 
-        {/* Executive Score Gauges Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 pt-2">
-          {/* Campaign Score Badge */}
-          <div className="bg-slate-800/80 border border-slate-700/80 rounded-xl p-4 flex items-center justify-between">
-            <div>
-              <span className="text-[11px] text-slate-400 font-semibold uppercase tracking-wider block">
-                Campaign Intelligence Score
-              </span>
-              <div className="flex items-baseline gap-2 mt-1">
-                <span className="font-heading text-3xl font-black text-white">{campaignScore}</span>
-                <span className="text-xs font-bold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">
-                  Grade {campaignGrade}
-                </span>
+        {/* Top Executive Health & Readiness Gauge Card */}
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-center pt-2">
+          {/* Readiness Circle & Verdict */}
+          <div className="md:col-span-5 bg-slate-900/90 border border-slate-800 rounded-xl p-5 flex items-center gap-5">
+            <div className="relative shrink-0 flex items-center justify-center">
+              <div className={`w-20 h-20 rounded-full border-4 flex flex-col items-center justify-center font-black ${
+                overallReadinessScore >= 85 
+                  ? 'border-emerald-500 bg-emerald-950/40 text-emerald-400' 
+                  : overallReadinessScore >= 70 
+                    ? 'border-amber-500 bg-amber-950/40 text-amber-300' 
+                    : 'border-rose-500 bg-rose-950/40 text-rose-400'
+              }`}>
+                <span className="text-2xl font-black leading-none">{overallReadinessScore}</span>
+                <span className="text-[10px] text-slate-400 font-bold uppercase mt-0.5">/ 100</span>
               </div>
             </div>
-            <div className="w-12 h-12 rounded-xl bg-blue-500/20 border border-blue-500/30 flex items-center justify-center text-blue-400 font-black text-sm">
-              <BrainCircuit className="w-6 h-6" />
-            </div>
-          </div>
 
-          {/* Offer Score Badge */}
-          <div className="bg-slate-800/80 border border-slate-700/80 rounded-xl p-4 flex items-center justify-between">
-            <div>
-              <span className="text-[11px] text-slate-400 font-semibold uppercase tracking-wider block">
-                Offer Packaging Score
+            <div className="space-y-1">
+              <span className="text-[10px] uppercase font-mono tracking-wider text-slate-400 block font-bold">
+                Overall Campaign Readiness
               </span>
-              <div className="flex items-baseline gap-2 mt-1">
-                <span className="font-heading text-3xl font-black text-amber-300">{offerScore}</span>
-                <span className="text-xs font-semibold text-slate-300">/ 100</span>
+              <div className="flex items-center gap-2">
+                {overallReadinessScore >= 85 ? (
+                  <span className="px-2.5 py-0.5 rounded text-[11px] font-extrabold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 flex items-center gap-1">
+                    <Sparkles className="w-3 h-3 text-emerald-400" /> High Potential
+                  </span>
+                ) : overallReadinessScore >= 70 ? (
+                  <span className="px-2.5 py-0.5 rounded text-[11px] font-extrabold bg-amber-500/20 text-amber-300 border border-amber-500/30 flex items-center gap-1">
+                    <Sliders className="w-3 h-3 text-amber-400" /> Pre-Launch Tweaks Needed
+                  </span>
+                ) : (
+                  <span className="px-2.5 py-0.5 rounded text-[11px] font-extrabold bg-rose-500/20 text-rose-300 border border-rose-500/30 flex items-center gap-1">
+                    <AlertTriangle className="w-3 h-3 text-rose-400" /> NOT READY (High Risk)
+                  </span>
+                )}
               </div>
-            </div>
-            <div className="w-12 h-12 rounded-xl bg-amber-500/20 border border-amber-500/30 flex items-center justify-center text-amber-300 font-black text-sm">
-              <Zap className="w-6 h-6" />
-            </div>
-          </div>
-
-          {/* Confidence Index */}
-          <div className="bg-slate-800/80 border border-slate-700/80 rounded-xl p-4 flex items-center justify-between">
-            <div>
-              <span className="text-[11px] text-slate-400 font-semibold uppercase tracking-wider block">
-                AI Confidence Level
-              </span>
-              <div className="flex items-baseline gap-2 mt-1">
-                <span className="font-heading text-3xl font-black text-emerald-400">{confidenceScore}%</span>
-                <span className="text-xs text-emerald-400 font-medium">High Conviction</span>
-              </div>
-            </div>
-            <div className="w-12 h-12 rounded-xl bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center text-emerald-400 font-black text-sm">
-              <Award className="w-6 h-6" />
-            </div>
-          </div>
-
-          {/* Objective */}
-          <div className="bg-slate-800/80 border border-slate-700/80 rounded-xl p-4 flex items-center justify-between">
-            <div>
-              <span className="text-[11px] text-slate-400 font-semibold uppercase tracking-wider block">
-                Recommended Objective
-              </span>
-              <p className="font-heading text-sm font-bold text-white mt-1 leading-snug line-clamp-2">
-                {strategy.recommended_campaign_objective || 'Sales & Conversions'}
+              <p className="text-xs text-slate-300 font-normal leading-snug line-clamp-2">
+                {healthAssessment.readiness_verdict}
               </p>
             </div>
-            <div className="w-12 h-12 rounded-xl bg-indigo-500/20 border border-indigo-500/30 flex items-center justify-center text-indigo-400 shrink-0 font-black text-sm">
-              <Target className="w-6 h-6" />
+          </div>
+
+          {/* Quick Metrics */}
+          <div className="md:col-span-7 grid grid-cols-3 gap-3">
+            <div className="bg-slate-900/90 border border-slate-800 rounded-xl p-4 space-y-1 text-center">
+              <span className="text-[10px] text-slate-400 uppercase font-bold block">Offer Score</span>
+              <span className="text-2xl font-black text-amber-300">{offerScore}<span className="text-xs font-normal text-slate-400">/100</span></span>
+              <span className="text-[10px] text-slate-400 block">Packaging Rating</span>
+            </div>
+
+            <div className="bg-slate-900/90 border border-slate-800 rounded-xl p-4 space-y-1 text-center">
+              <span className="text-[10px] text-slate-400 uppercase font-bold block">Campaign Score</span>
+              <span className="text-2xl font-black text-blue-400">{campaignScore}<span className="text-xs font-normal text-slate-400">/100</span></span>
+              <span className="text-[10px] text-slate-400 block">Structure Alignment</span>
+            </div>
+
+            <div className="bg-slate-900/90 border border-slate-800 rounded-xl p-4 space-y-1 text-center">
+              <span className="text-[10px] text-slate-400 uppercase font-bold block">AI Confidence</span>
+              <span className="text-2xl font-black text-emerald-400">{confidenceScore}%</span>
+              <span className="text-[10px] text-slate-400 block">Diagnostic Certainty</span>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Report Navigation Tabs */}
+      {/* Consulting Dashboard Navigation Tabs */}
       <div className="flex items-center gap-1.5 overflow-x-auto pb-2 border-b border-slate-200 no-scrollbar">
         {[
+          { id: 'health', label: 'Campaign Health Assessment', icon: Gauge, badge: `${overallReadinessScore}/100` },
           { id: 'summary', label: 'Executive Summary', icon: FileText },
-          { id: 'swot', label: 'SWOT Analysis', icon: ShieldAlert },
+          { id: 'swot', label: 'SWOT Diagnostic', icon: ShieldAlert },
           { id: 'audience', label: 'Audience Strategy', icon: Users },
           { id: 'creative', label: 'Creative Strategy', icon: Sparkles },
           { id: 'copy', label: 'Copy & Hooks', icon: Flame },
@@ -328,10 +400,211 @@ export const StrategyViewer: React.FC<StrategyViewerProps> = ({
             >
               <IconComponent className={`w-4 h-4 ${isActive ? 'text-amber-400' : 'text-slate-400'}`} />
               <span>{tab.label}</span>
+              {tab.badge && (
+                <span className={`px-1.5 py-0.2 rounded text-[10px] font-mono ${isActive ? 'bg-amber-400/20 text-amber-300' : 'bg-slate-100 text-slate-600'}`}>
+                  {tab.badge}
+                </span>
+              )}
             </button>
           );
         })}
       </div>
+
+      {/* TAB 0: CAMPAIGN HEALTH ASSESSMENT (PRIMARY DEMAND) */}
+      {activeTab === 'health' && (
+        <div className="space-y-8 animate-fadeIn">
+          {/* Readiness Score Verdict Callout Card */}
+          <div className={`rounded-2xl p-6 sm:p-8 border shadow-sm space-y-4 ${
+            overallReadinessScore < 70 
+              ? 'bg-rose-50/70 border-rose-300 text-rose-950' 
+              : overallReadinessScore >= 85 
+                ? 'bg-emerald-50/70 border-emerald-300 text-emerald-950' 
+                : 'bg-amber-50/70 border-amber-300 text-amber-950'
+          }`}>
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-black/10 pb-4">
+              <div className="flex items-center gap-3">
+                {overallReadinessScore < 70 ? (
+                  <div className="w-10 h-10 rounded-xl bg-rose-600 text-white flex items-center justify-center shrink-0 shadow-sm">
+                    <XCircle className="w-6 h-6" />
+                  </div>
+                ) : overallReadinessScore >= 85 ? (
+                  <div className="w-10 h-10 rounded-xl bg-emerald-600 text-white flex items-center justify-center shrink-0 shadow-sm">
+                    <CheckCircle2 className="w-6 h-6" />
+                  </div>
+                ) : (
+                  <div className="w-10 h-10 rounded-xl bg-amber-600 text-white flex items-center justify-center shrink-0 shadow-sm">
+                    <AlertCircle className="w-6 h-6" />
+                  </div>
+                )}
+                <div>
+                  <span className="text-[11px] font-mono uppercase tracking-widest font-extrabold opacity-75 block">
+                    Campaign Strategic Readiness Diagnostic
+                  </span>
+                  <h2 className="font-heading text-xl font-extrabold tracking-tight">
+                    {overallReadinessScore < 70 
+                      ? 'Campaign is NOT Ready for Launch' 
+                      : overallReadinessScore >= 85 
+                        ? 'High Scaling Readiness & Commercial Potential' 
+                        : 'Moderate Readiness — Pre-Flight Fixes Recommended'}
+                  </h2>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-bold uppercase tracking-wider px-3 py-1 rounded-full bg-white/80 border border-black/10 font-mono">
+                  Overall Score: {overallReadinessScore}/100
+                </span>
+              </div>
+            </div>
+
+            <p className="text-sm sm:text-base leading-relaxed font-normal">
+              {healthAssessment.readiness_verdict}
+            </p>
+          </div>
+
+          {/* 10-Point Health Diagnostic Grid */}
+          <div className="bg-white border border-slate-200 rounded-2xl p-6 sm:p-8 shadow-sm space-y-6">
+            <div className="border-b border-slate-100 pb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+              <div>
+                <h3 className="font-heading text-lg font-bold text-slate-900 flex items-center gap-2">
+                  <BarChart3 className="w-5 h-5 text-indigo-600" />
+                  <span>10-Point Campaign Health Audit</span>
+                </h3>
+                <p className="text-xs text-slate-500">
+                  Granular scoring (0–100) across all key commercial, marketing, and creative vectors.
+                </p>
+              </div>
+
+              <span className="text-xs font-mono font-semibold text-slate-400">
+                Score Range: 0 (Critical Bottleneck) – 100 (Optimal Benchmark)
+              </span>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {healthCategoriesList.map((cat, idx) => {
+                const score = cat.score;
+                const isGreen = score >= 80;
+                const isAmber = score >= 65 && score < 80;
+                const isRed = score < 65;
+
+                return (
+                  <div key={idx} className="bg-slate-50/80 border border-slate-200/90 rounded-xl p-4 space-y-3 transition-all hover:border-slate-300">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <span className="w-5 h-5 rounded-full bg-slate-200 text-slate-700 text-[10px] font-bold flex items-center justify-center">
+                          {idx + 1}
+                        </span>
+                        <h4 className="font-heading text-sm font-bold text-slate-900">{cat.label}</h4>
+                      </div>
+
+                      <div className="flex items-center gap-2">
+                        <span className={`font-mono font-black text-sm px-2.5 py-0.5 rounded ${
+                          isGreen ? 'bg-emerald-100 text-emerald-800' : isAmber ? 'bg-amber-100 text-amber-800' : 'bg-rose-100 text-rose-800'
+                        }`}>
+                          {score}/100
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Progress Bar */}
+                    <div className="w-full bg-slate-200 h-2 rounded-full overflow-hidden">
+                      <div 
+                        className={`h-full transition-all duration-500 rounded-full ${
+                          isGreen ? 'bg-emerald-500' : isAmber ? 'bg-amber-500' : 'bg-rose-500'
+                        }`}
+                        style={{ width: `${score}%` }}
+                      />
+                    </div>
+
+                    <p className="text-xs text-slate-600 leading-snug">
+                      {cat.verdict || `Assessment completed for ${cat.label.toLowerCase()}.`}
+                    </p>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Priority Fixes (Ranked Highest to Lowest Impact) */}
+          <div className="bg-white border border-slate-200 rounded-2xl p-6 sm:p-8 shadow-sm space-y-6">
+            <div className="border-b border-slate-100 pb-4">
+              <h3 className="font-heading text-lg font-bold text-slate-900 flex items-center gap-2">
+                <Flame className="w-5 h-5 text-amber-500" />
+                <span>Priority Fixes & Pre-Launch Optimization Roadmap</span>
+              </h3>
+              <p className="text-xs text-slate-500">
+                Ranked from highest impact to lowest impact to maximize ROAS uplift prior to scaling media spend.
+              </p>
+            </div>
+
+            <div className="space-y-4">
+              {priorityFixes.map((fix, idx) => {
+                const isCritical = fix.impact === 'CRITICAL';
+                const isHigh = fix.impact === 'HIGH';
+
+                return (
+                  <div 
+                    key={idx} 
+                    className={`border rounded-2xl p-5 sm:p-6 space-y-3 transition-all ${
+                      isCritical 
+                        ? 'bg-rose-50/40 border-rose-200 hover:border-rose-300' 
+                        : isHigh 
+                          ? 'bg-amber-50/40 border-amber-200 hover:border-amber-300' 
+                          : 'bg-slate-50 border-slate-200 hover:border-slate-300'
+                    }`}
+                  >
+                    <div className="flex flex-wrap items-center justify-between gap-3 border-b border-black/5 pb-3">
+                      <div className="flex items-center gap-3">
+                        <span className={`w-7 h-7 rounded-full font-black text-xs flex items-center justify-center shrink-0 ${
+                          isCritical ? 'bg-rose-600 text-white' : isHigh ? 'bg-amber-600 text-white' : 'bg-blue-600 text-white'
+                        }`}>
+                          #{idx + 1}
+                        </span>
+
+                        <div>
+                          <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 block">
+                            {fix.category}
+                          </span>
+                          <h4 className="font-heading text-base font-bold text-slate-900">{fix.title}</h4>
+                        </div>
+                      </div>
+
+                      <div className="flex flex-wrap items-center gap-2">
+                        {/* Impact */}
+                        <span className={`px-2.5 py-0.5 rounded text-[11px] font-extrabold uppercase font-mono ${
+                          isCritical 
+                            ? 'bg-rose-100 text-rose-800 border border-rose-300' 
+                            : isHigh 
+                              ? 'bg-amber-100 text-amber-800 border border-amber-300' 
+                              : 'bg-blue-100 text-blue-800 border border-blue-300'
+                        }`}>
+                          Impact: {fix.impact}
+                        </span>
+
+                        {/* Difficulty */}
+                        <span className="px-2.5 py-0.5 rounded text-[11px] font-semibold bg-white text-slate-700 border border-slate-200">
+                          Difficulty: {fix.difficulty}
+                        </span>
+
+                        {/* ROAS Lift */}
+                        <span className="px-2.5 py-0.5 rounded text-[11px] font-extrabold bg-emerald-100 text-emerald-800 border border-emerald-300 flex items-center gap-1 font-mono">
+                          <ArrowUpRight className="w-3.5 h-3.5 text-emerald-600" />
+                          <span>{fix.estimated_roas_improvement}</span>
+                        </span>
+                      </div>
+                    </div>
+
+                    <p className="text-xs sm:text-sm text-slate-700 leading-relaxed font-normal">
+                      <strong className="font-semibold text-slate-900">Strategic Reasoning: </strong>
+                      {fix.reasoning}
+                    </p>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* TAB 1: EXECUTIVE SUMMARY & INTERNAL DIAGNOSIS */}
       {activeTab === 'summary' && (
@@ -956,7 +1229,7 @@ export const StrategyViewer: React.FC<StrategyViewerProps> = ({
                 <div key={idx} className="bg-slate-50 border border-slate-200 rounded-2xl p-6 space-y-4">
                   <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-200 pb-3">
                     <div className="flex items-center gap-3">
-                      <span className="px-3 py-1 rounded-full bg-blue-600 text-white font-extrabold text-xs">
+                      <span className="px-3 py-1 rounded-full bg-blue-600 text-white font-extrabold text-xs font-mono">
                         {step.day_range}
                       </span>
                       <h3 className="font-heading text-base font-bold text-slate-900">
@@ -968,9 +1241,9 @@ export const StrategyViewer: React.FC<StrategyViewerProps> = ({
 
                   <ul className="space-y-2.5 text-xs text-slate-800">
                     {step.tasks.map((task, tIdx) => (
-                      <li key={tIdx} className="flex items-start gap-3 bg-white p-3 rounded-xl border border-slate-200 shadow-2xs font-medium">
+                      <li key={tIdx} className="flex items-start gap-2 bg-white p-3 rounded-xl border border-slate-200 shadow-2xs">
                         <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
-                        <span>{task}</span>
+                        <span className="font-medium text-slate-800">{task}</span>
                       </li>
                     ))}
                   </ul>
