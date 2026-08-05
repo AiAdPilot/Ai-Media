@@ -202,3 +202,125 @@ export function getLocalRequests(): CampaignRequest[] {
   }
   return [];
 }
+
+/**
+ * Fetches prompt template `campaign_strategist` from Supabase prompt_templates table.
+ */
+export async function fetchPromptTemplateFromSupabase(name: string = 'campaign_strategist'): Promise<{
+  system_prompt?: string;
+  user_prompt?: string;
+  template?: string;
+} | null> {
+  const client = getSupabaseClient();
+  if (client) {
+    try {
+      const { data, error } = await client
+        .from('prompt_templates')
+        .select('*')
+        .or(`name.eq.${name},id.eq.${name}`)
+        .maybeSingle();
+
+      if (!error && data) {
+        return data;
+      }
+    } catch (err) {
+      console.warn(`Error fetching prompt template ${name}:`, err);
+    }
+  }
+  return null;
+}
+
+/**
+ * Saves a generated strategy object into Supabase `campaign_strategies.strategy_json`,
+ * linking it directly to the campaign_request record via `campaign_request_id`.
+ */
+export async function saveCampaignStrategyToSupabase(
+  campaignRequestId: string,
+  strategy: any
+): Promise<{ success: boolean; isSupabase: boolean; error?: string; id?: string }> {
+  const client = getSupabaseClient();
+  const id = strategy.id || `strat_${Date.now().toString(36)}_${Math.random().toString(36).substring(2, 6)}`;
+  const createdAt = strategy.created_at || new Date().toISOString();
+  const strategyJsonStr = typeof strategy === 'string' ? strategy : JSON.stringify(strategy);
+
+  if (client) {
+    try {
+      // First attempt: insert with stringified JSON payload
+      const { error } = await client
+        .from('campaign_strategies')
+        .insert([
+          {
+            id,
+            campaign_request_id: campaignRequestId,
+            strategy_json: strategyJsonStr,
+            created_at: createdAt,
+          },
+        ]);
+
+      if (!error) {
+        return { success: true, isSupabase: true, id };
+      }
+
+      // Fallback attempt: if column expects JSON object directly
+      if (typeof strategy === 'object') {
+        const { error: retryError } = await client
+          .from('campaign_strategies')
+          .insert([
+            {
+              id,
+              campaign_request_id: campaignRequestId,
+              strategy_json: strategy,
+              created_at: createdAt,
+            },
+          ]);
+
+        if (!retryError) {
+          return { success: true, isSupabase: true, id };
+        }
+      }
+
+      console.warn('Supabase campaign_strategies insertion error:', error.message);
+      return { success: false, isSupabase: false, error: error.message, id };
+    } catch (err: any) {
+      console.warn('Exception saving strategy to campaign_strategies table:', err);
+      return { success: false, isSupabase: false, error: err?.message, id };
+    }
+  }
+
+  return { success: true, isSupabase: false, id };
+}
+
+/**
+ * Alias for saveCampaignStrategyToSupabase.
+ * Writes generated strategy into campaign_strategies linked to campaign_request record.
+ */
+export const saveGeneratedStrategy = saveCampaignStrategyToSupabase;
+
+/**
+ * Fetches a saved strategy by campaign_request_id from campaign_strategies table.
+ */
+export async function fetchCampaignStrategyByRequestId(requestId: string): Promise<any | null> {
+  const client = getSupabaseClient();
+  if (client) {
+    try {
+      const { data, error } = await client
+        .from('campaign_strategies')
+        .select('*')
+        .eq('campaign_request_id', requestId)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      if (!error && data) {
+        if (typeof data.strategy_json === 'string') {
+          return JSON.parse(data.strategy_json);
+        }
+        return data.strategy_json;
+      }
+    } catch (err) {
+      console.warn(`Error fetching strategy for request ${requestId}:`, err);
+    }
+  }
+  return null;
+}
+

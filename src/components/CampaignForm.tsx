@@ -15,13 +15,17 @@ import {
   Database,
   ArrowRight
 } from 'lucide-react';
-import { CampaignGoal, CampaignRequest } from '../types';
+import { CampaignGoal, CampaignRequest, CampaignStrategy } from '../types';
 import { COUNTRY_OPTIONS } from '../lib/strategyGenerator';
 import { validateCampaignRequest } from '../lib/formValidation';
-import { saveCampaignRequestToSupabase, DatabaseOperationResult } from '../lib/databaseService';
+import { executeAiCampaignStrategyEngine } from '../lib/aiStrategyEngine';
 
 interface CampaignFormProps {
-  onSubmit?: (formData: CampaignRequest, saveResult?: DatabaseOperationResult<CampaignRequest>) => void;
+  onSubmit?: (
+    formData: CampaignRequest, 
+    strategy?: CampaignStrategy, 
+    meta?: { requestId: string; savedRequestToSupabase: boolean; savedStrategyToSupabase: boolean }
+  ) => void;
   isSubmitting?: boolean;
 }
 
@@ -115,28 +119,34 @@ export const CampaignForm: React.FC<CampaignFormProps> = ({ onSubmit, isSubmitti
     setInternalSubmitting(true);
 
     try {
-      // 2. Save campaign request into Supabase `campaign_requests` table
-      const saveResult = await saveCampaignRequestToSupabase(payload);
+      // Execute 1-Click AI Campaign Strategy Engine
+      // 1. Saves brief into Supabase campaign_requests
+      // 2. Fetches prompt_templates (campaign_strategist)
+      // 3. Combines prompts and calls Gemini 2.5 Pro
+      // 4. Parses JSON response
+      // 5. Saves response into Supabase campaign_strategies.strategy_json
+      const engineResult = await executeAiCampaignStrategyEngine(payload);
 
-      if (saveResult.success && saveResult.id) {
-        // Show success notification & newly created campaign request ID
+      if (engineResult.success && engineResult.campaignRequestId) {
         setSavedSuccessResult({
-          id: saveResult.id,
-          request: saveResult.data,
-          isSupabase: saveResult.isSupabase,
-          warningMessage: saveResult.error,
+          id: engineResult.campaignRequestId,
+          request: engineResult.campaignRequest,
+          isSupabase: engineResult.savedRequestToSupabase,
+          warningMessage: engineResult.error,
         });
 
-        // Trigger parent handler if provided
         if (onSubmit) {
-          onSubmit(saveResult.data, saveResult);
+          onSubmit(engineResult.campaignRequest, engineResult.strategy, {
+            requestId: engineResult.campaignRequestId,
+            savedRequestToSupabase: engineResult.savedRequestToSupabase,
+            savedStrategyToSupabase: engineResult.savedStrategyToSupabase,
+          });
         }
       } else {
-        // Handle database insertion error
-        setSubmissionError(saveResult.error || 'Failed to save campaign request to Supabase.');
+        setSubmissionError(engineResult.error || 'Failed to generate campaign strategy.');
       }
     } catch (err: any) {
-      setSubmissionError(err?.message || 'Unexpected exception occurred while saving request.');
+      setSubmissionError(err?.message || 'Unexpected exception occurred during strategy generation.');
     } finally {
       setInternalSubmitting(false);
     }

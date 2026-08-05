@@ -60,18 +60,17 @@ export default function App() {
   // Form Submission Handler called when CampaignForm submits
   const handleFormSubmit = async (
     formData: CampaignRequest, 
-    saveResult?: DatabaseOperationResult<CampaignRequest>
+    generatedStrategy?: CampaignStrategy,
+    meta?: { requestId: string; savedRequestToSupabase: boolean; savedStrategyToSupabase: boolean }
   ) => {
-    // 1. Determine final saved data (with returned ID)
-    const result = saveResult || await saveCampaignRequestToSupabase(formData);
-    const savedData = result.data || formData;
+    setCurrentRequest(formData);
+    setIsSavedInSupabaseThisSession(Boolean(meta?.savedRequestToSupabase));
 
-    setCurrentRequest(savedData);
-    setIsSavedInSupabaseThisSession(result.isSupabase);
+    const finalStrategy = generatedStrategy || generateStrategyFromRequest(formData);
+    setCurrentStrategy(finalStrategy);
 
-    // 2. Generate Strategy object based on saved request
-    const strategy = generateStrategyFromRequest(savedData);
-    setCurrentStrategy(strategy);
+    // Transition to loading animation then strategy view
+    setAppState('loading');
 
     // Refresh saved campaign requests list from DB
     await loadRequests();
